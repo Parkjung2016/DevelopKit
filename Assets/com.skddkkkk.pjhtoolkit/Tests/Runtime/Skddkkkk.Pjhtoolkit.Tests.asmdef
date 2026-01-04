@@ -1,0 +1,11 @@
+{
+    "name": "Skddkkkk.Pjhtoolkit.Tests",
+    "references": [
+        "Skddkkkk.Pjhtoolkit"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": []
+}

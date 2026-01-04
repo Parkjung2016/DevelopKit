@@ -1,0 +1,16 @@
+{
+  "name": "com.parkjung2016.pjhtoolkit",
+  "displayName": "PJHToolkit",
+  "version": "1.0.5",
+  "unity": "2021.0",
+  "unityRelease": "1f1",
+  "description": "A collection of utilities, extensions, managers for Unity development.",
+  "author": {
+    "name": "Parkjung2016",
+    "email": "bagj21563@gmail.com"
+  },
+  "dependencies": {
+    "com.unity.addressables": "2.7.6",
+    "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask"
+  }
+}

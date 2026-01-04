@@ -1,0 +1,14 @@
+{
+    "name": "Skddkkkk.Pjhtoolkit.Editor.Tests",
+    "references": [
+        "Skddkkkk.Pjhtoolkit.Editor",
+        "Skddkkkk.Pjhtoolkit"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": []
+}
