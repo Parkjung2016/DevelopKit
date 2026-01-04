@@ -1,0 +1,16 @@
+{
+  "name": "com.skddkkkk.developkit",
+  "displayName": "DevelopKit",
+  "version": "1.0.0",
+  "unity": "2021.0",
+  "unityRelease": "1f1",
+  "description": "\uac1c\ubc1c \ud3b8\uc758 \ud328\ud0a4\uc9c0\ub4e4\uc744 \uc81c\uacf5\ud569\ub2c8\ub2e4",
+  "author": {
+    "name": "Parkjung2016",
+    "email": "bagj21563@gmail.com"
+  },
+  "dependencies": {
+    "com.unity.addressables": "2.7.6",
+    "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask"
+  }
+}
