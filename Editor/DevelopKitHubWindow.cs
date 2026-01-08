@@ -1,84 +1,194 @@
+Ôªøusing System.Linq;
+using System.Threading.Tasks;
 using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class DevelopKitHubWindow : EditorWindow
+namespace Skddkkkk.DevelopKit.Editor
 {
-    private const string basicTemplatePackageName = "https://github.com/Parkjung2016/Toolkit.git#basic-template";
-    private static readonly Vector2 windowSize = new Vector2(500, 500);
-    [SerializeField]
-    private VisualTreeAsset m_VisualTreeAsset = default;
-
-    private AddRequest addRequest;
-    [MenuItem("Parkjung2016/DevelopKit Hub")]
-    public static void ShowExample()
+    public class DevelopKitHubWindow : EditorWindow
     {
-        DevelopKitHubWindow wnd = GetWindow<DevelopKitHubWindow>();
-        wnd.titleContent = new GUIContent("DevelopKit Hub");
-        wnd.maxSize = windowSize + new Vector2(0.1f, 0.1f);
-        wnd.minSize = windowSize;
-    }
+        private const string basicTemplatePackageName = "com.skddkkkk.developkit.basictemplate";
+        private const string frameworkPackageName = "com.skddkkkk.developkit.framework";
+        private const string basicTemplateGitUrl = "https://github.com/Parkjung2016/Toolkit.git#basic-template";
+        private const string frameworkGitUrl = "https://github.com/Parkjung2016/Toolkit.git#framework";
+        private static readonly Vector2 windowSize = new Vector2(500, 500);
+        [SerializeField] private VisualTreeAsset m_VisualTreeAsset = default;
+        private Button installButton;
 
-    public void CreateGUI()
-    {
-        var root = rootVisualElement;
-        var uxml = m_VisualTreeAsset.Instantiate();
+        private AddRequest addRequest;
+        private RemoveRequest removeRequest;
 
-        root.Add(uxml);
-
-
-        uxml.Q("BasicTemplate").Q("Background").Q<Button>("Btn_Install").clicked += () =>
+        [MenuItem("Skddkkkk/DevelopKit Hub")]
+        public static void ShowExample()
         {
-            InstallPackage(basicTemplatePackageName);
-        };
+            DevelopKitHubWindow wnd = GetWindow<DevelopKitHubWindow>();
+            wnd.titleContent = new GUIContent("DevelopKit Hub");
+            wnd.maxSize = windowSize + new Vector2(0.1f, 0.1f);
+            wnd.minSize = windowSize;
+        }
 
-        uxml.Q("SolvePakcageDependencies").Q("Background").Q<Button>("Btn_Install").clicked += () =>
+        public async void CreateGUI()
         {
-        };
-    }
+            var installedPackageList = await GetInstalledPackages();
+            var root = rootVisualElement;
+            var uxml = m_VisualTreeAsset.Instantiate();
+            
+            var basicTemplateSection = uxml.Q("BasicTemplate");
+            var frameworkeSection = uxml.Q("Framework");
+            SetBasicTemplateInstallButton(installedPackageList, basicTemplateSection);
+            SetFrameworkInstallButton(installedPackageList, frameworkeSection);
+            uxml.Q("SolvePakcageDependencies").Q("Background").Q<Button>("Btn_Install").clicked += () => { };
+            
+            root.Add(uxml);
+        }
 
+        private void SetBasicTemplateInstallButton(PackageCollection installedPackageList,
+            VisualElement basicTemplateSection)
+        {
+            var installBtn = basicTemplateSection.Q("Background").Q<Button>("Btn_Install");
+            if (installedPackageList.Any(p => p.name == basicTemplatePackageName))
+            {
+                installBtn.text = "Remove Basic Template";
+                basicTemplateSection.RemoveFromClassList("installable");
+                basicTemplateSection.AddToClassList("removeable");
+                installBtn.clicked += () =>
+                {
+                    installButton = installBtn;
+                    RemovePackage(basicTemplatePackageName);
+                };
+            }
+            else
+            {
+                installBtn.text = "Install Basic Template";
+                basicTemplateSection.RemoveFromClassList("removeable");
+                basicTemplateSection.AddToClassList("installable");
+                installBtn.clicked += () =>
+                {
+                    installButton = installBtn;
+                    InstallPackage(basicTemplateGitUrl);
+                };
+            }
+        }
 
-    void InstallPackage(string packageName)
-    {
-        EditorUtility.DisplayProgressBar(
-              "Installing Package",
-              $"Installing {packageName}...",
-              0.3f);
+        private void SetFrameworkInstallButton(PackageCollection installedPackageList,
+            VisualElement frameworkSection)
+        {
+            var installBtn = frameworkSection.Q("Background").Q<Button>("Btn_Install");
+            if (installedPackageList.Any(p => p.name == basicTemplatePackageName))
+            {
+                installBtn.text = "Remove Framework";
+                frameworkSection.RemoveFromClassList("installable");
+                frameworkSection.AddToClassList("removeable");
+                installBtn.clicked += () =>
+                {
+                    installButton = installBtn;
+                    RemovePackage(frameworkPackageName);
+                };
+            }
+            else
+            {
+                installBtn.text = "Install Framework";
+                frameworkSection.RemoveFromClassList("removeable");
+                frameworkSection.AddToClassList("installable");
+                installBtn.clicked += () =>
+                {
+                    installButton = installBtn;
+                    InstallPackage(frameworkGitUrl);
+                };
+            }
+        }
 
-        addRequest = Client.Add(packageName);
-        EditorApplication.update += () =>
+        private void RemovePackage(string packageName)
+        {
+            installButton.SetEnabled(false);
+
+            removeRequest = Client.Remove(packageName);
+            EditorApplication.update += OnRemoveProgress;
+        }
+
+        private void OnRemoveProgress()
+        {
+            if (!removeRequest.IsCompleted)
+                return;
+
+            EditorUtility.ClearProgressBar();
+            EditorApplication.update -= OnRemoveProgress;
+
+            if (removeRequest.Status == StatusCode.Success)
+            {
+                EditorUtility.DisplayDialog(
+                    "Remove Complete",
+                    "Ìå®ÌÇ§ÏßÄÍ∞Ä Ï†úÍ±∞ÎêòÏóàÏäµÎãàÎã§.",
+                    "OK");
+            }
+            else
+            {
+                EditorUtility.DisplayDialog(
+                    "Remove Failed",
+                    removeRequest.Error.message,
+                    "OK");
+            }
+
+            installButton.SetEnabled(true);
+        }
+
+        private void InstallPackage(string gitUrl)
+        {
+            installButton.SetEnabled(false);
+            addRequest = Client.Add(gitUrl);
+            EditorApplication.update += OnInstallProgress;
+        }
+
+        private void OnInstallProgress()
         {
             if (!addRequest.IsCompleted)
                 return;
+            EditorUtility.ClearProgressBar();
+            EditorApplication.update -= OnInstallProgress;
 
-            EditorApplication.update -= OnPackageProgress;
-        };
-    }
-
-    void OnPackageProgress()
-    {
-        if (!addRequest.IsCompleted)
-            return;
-
-        EditorUtility.ClearProgressBar();
-
-        if (addRequest.Status == StatusCode.Success)
-        {
-            EditorUtility.DisplayDialog(
-                "Install Complete",
-                "∆–≈∞¡ˆ º≥ƒ°∞° øœ∑·µ«æ˙Ω¿¥œ¥Ÿ.",
-                "OK");
-        }
-        else
-        {
-            EditorUtility.DisplayDialog(
-                "Install Failed",
-                addRequest.Error.message,
-                "OK");
+            if (addRequest.Status != StatusCode.Success)
+            {
+                EditorUtility.DisplayDialog(
+                    "Install Failed",
+                    addRequest.Error.message,
+                    "OK");
+            }
+            else
+            {
+                EditorUtility.DisplayDialog(
+                    "Install Complete",
+                    $"Ìå®ÌÇ§ÏßÄÍ∞Ä ÏÑ§ÏπòÎêòÏóàÏäµÎãàÎã§.",
+                    "OK");
+            }
         }
 
-        EditorApplication.update -= OnPackageProgress;
+        private async Task<PackageCollection> GetInstalledPackages()
+        {
+            var tcs = new TaskCompletionSource<PackageCollection>();
+            ListRequest request = Client.List(true);
+
+            EditorApplication.update += Progress;
+
+            void Progress()
+            {
+                if (!request.IsCompleted)
+                    return;
+
+                EditorApplication.update -= Progress;
+                if (request.Status == StatusCode.Success)
+                {
+                    tcs.SetResult(request.Result);
+                }
+                else
+                {
+                    tcs.SetException(new System.Exception(request.Error.message));
+                }
+            }
+
+            return await tcs.Task;
+        }
     }
 }

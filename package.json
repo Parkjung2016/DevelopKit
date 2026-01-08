@@ -9,7 +9,5 @@
     "name": "Parkjung2016",
     "email": "bagj21563@gmail.com"
   },
-  "dependencies": {
-    "com.unity.addressables": "2.7.6"
-  }
+  "dependencies": {}
 }
