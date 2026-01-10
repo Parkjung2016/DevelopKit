@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "unity": "2021.0",
   "unityRelease": "1f1",
-  "description": "개발 편의 패키지들을 제공합니다",
+  "description": "Packages for development convenience.",
   "author": {
     "name": "Parkjung2016",
     "email": "bagj21563@gmail.com"
