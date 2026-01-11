@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEditor;
 using UnityEditor.PackageManager;
@@ -12,8 +12,6 @@ namespace Skddkkkk.DevelopKit.Editor
     {
         private const string basicTemplatePackageName = "com.skddkkkk.developkit.basictemplate";
         private const string frameworkPackageName = "com.skddkkkk.developkit.framework";
-        private const string basicTemplateGitUrl = "https://github.com/Parkjung2016/Toolkit.git#basic-template";
-        private const string frameworkGitUrl = "https://github.com/Parkjung2016/Toolkit.git#framework";
         private static readonly Vector2 windowSize = new Vector2(500, 500);
         [SerializeField] private VisualTreeAsset m_VisualTreeAsset = default;
         private Button installButton;
@@ -68,7 +66,7 @@ namespace Skddkkkk.DevelopKit.Editor
                 installBtn.clicked += () =>
                 {
                     installButton = installBtn;
-                    InstallPackage(basicTemplateGitUrl);
+                    InstallPackage(basicTemplatePackageName);
                 };
             }
         }
@@ -77,7 +75,7 @@ namespace Skddkkkk.DevelopKit.Editor
             VisualElement frameworkSection)
         {
             var installBtn = frameworkSection.Q("Background").Q<Button>("Btn_Install");
-            if (installedPackageList.Any(p => p.name == basicTemplatePackageName))
+            if (installedPackageList.Any(p => p.name == frameworkPackageName))
             {
                 installBtn.text = "Remove Framework";
                 frameworkSection.RemoveFromClassList("installable");
@@ -96,7 +94,7 @@ namespace Skddkkkk.DevelopKit.Editor
                 installBtn.clicked += () =>
                 {
                     installButton = installBtn;
-                    InstallPackage(frameworkGitUrl);
+                    InstallPackage(frameworkPackageName);
                 };
             }
         }
@@ -135,10 +133,10 @@ namespace Skddkkkk.DevelopKit.Editor
             installButton.SetEnabled(true);
         }
 
-        private void InstallPackage(string gitUrl)
+        private void InstallPackage(string packageName)
         {
             installButton.SetEnabled(false);
-            addRequest = Client.Add(gitUrl);
+            addRequest = Client.Add(packageName);
             EditorApplication.update += OnInstallProgress;
         }
 
