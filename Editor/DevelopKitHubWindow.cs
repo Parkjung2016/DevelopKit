@@ -10,7 +10,9 @@ namespace Skddkkkk.DevelopKit.Editor
 {
     public class DevelopKitHubWindow : EditorWindow
     {
+        private const string basicTemplatePackageUrl = "https://github.com/Parkjung2016/DevelopKit_BasicTemplate.git";
         private const string basicTemplatePackageName = "com.skddkkkk.developkit.basictemplate";
+        private const string frameworkPackageUrl = "https://github.com/Parkjung2016/DevelopKit_Framework.git";
         private const string frameworkPackageName = "com.skddkkkk.developkit.framework";
         private static readonly Vector2 windowSize = new Vector2(500, 500);
         [SerializeField] private VisualTreeAsset m_VisualTreeAsset = default;
@@ -66,7 +68,7 @@ namespace Skddkkkk.DevelopKit.Editor
                 installBtn.clicked += () =>
                 {
                     installButton = installBtn;
-                    InstallPackage(basicTemplatePackageName);
+                    InstallPackage(basicTemplatePackageUrl);
                 };
             }
         }
@@ -94,7 +96,7 @@ namespace Skddkkkk.DevelopKit.Editor
                 installBtn.clicked += () =>
                 {
                     installButton = installBtn;
-                    InstallPackage(frameworkPackageName);
+                    InstallPackage(frameworkPackageUrl);
                 };
             }
         }
