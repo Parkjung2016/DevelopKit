@@ -14,10 +14,6 @@
             <AttributeOverrides element-name="Btn_Install" text="Install Framework"/>
             <AttributeOverrides element-name="Desc" text="StatSystem, AbilitySystem 등의&#10;개발에 필요한 프레임워크들을 제공합니다."/>
         </ui:Instance>
-        <ui:Instance template="DevelopTemplateButton" name="InstallAllPakcages">
-            <AttributeOverrides element-name="Btn_Install" text="Install All Packages" enabled="true"/>
-            <AttributeOverrides element-name="Desc" text="Git 저장소에서 모든 패키지를 재설치합니다."/>
-        </ui:Instance>
     </ui:VisualElement>
     <ui:VisualElement name="Dimmed" style="flex-grow: 1; position: absolute; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.51);"/>
 </ui:UXML>
