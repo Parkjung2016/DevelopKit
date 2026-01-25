@@ -10,159 +10,165 @@ namespace Skddkkkk.DevelopKit.Editor
 {
     public class DevelopKitHubWindow : EditorWindow
     {
-        private const string basicTemplatePackageUrl = "https://github.com/Parkjung2016/DevelopKit_BasicTemplate.git";
-        private const string basicTemplatePackageName = "com.skddkkkk.developkit.basictemplate";
-        private const string frameworkPackageUrl = "https://github.com/Parkjung2016/DevelopKit_Framework.git";
-        private const string frameworkPackageName = "com.skddkkkk.developkit.framework";
-        private static readonly Vector2 windowSize = new Vector2(500, 500);
-        [SerializeField] private VisualTreeAsset m_VisualTreeAsset = default;
-        private Button installButton;
+        private const string basicTemplatePackageUrl =
+            "https://github.com/Parkjung2016/DevelopKit_BasicTemplate.git";
 
-        private AddRequest addRequest;
-        private RemoveRequest removeRequest;
+        private const string basicTemplatePackageName =
+            "com.skddkkkk.developkit.basictemplate";
+
+        private const string frameworkPackageUrl =
+            "https://github.com/Parkjung2016/DevelopKit_Framework.git";
+
+        private const string frameworkPackageName =
+            "com.skddkkkk.developkit.framework";
+
+        private static readonly Vector2 windowSize = new Vector2(500, 500);
+
+        [SerializeField] private VisualTreeAsset m_VisualTreeAsset = default;
+
+        private VisualElement dimmed;
 
         [MenuItem("Skddkkkk/DevelopKit Hub")]
         public static void ShowExample()
         {
-            DevelopKitHubWindow wnd = GetWindow<DevelopKitHubWindow>();
+            var wnd = GetWindow<DevelopKitHubWindow>();
             wnd.titleContent = new GUIContent("DevelopKit Hub");
-            wnd.maxSize = windowSize + new Vector2(0.1f, 0.1f);
             wnd.minSize = windowSize;
+            wnd.maxSize = windowSize + Vector2.one * 0.1f;
         }
 
         public async void CreateGUI()
         {
-            var installedPackageList = await GetInstalledPackages();
+            var installedPackages = await GetInstalledPackages();
+
             var root = rootVisualElement;
             var uxml = m_VisualTreeAsset.Instantiate();
-            
-            var basicTemplateSection = uxml.Q("BasicTemplate");
-            var frameworkeSection = uxml.Q("Framework");
-            SetBasicTemplateInstallButton(installedPackageList, basicTemplateSection);
-            SetFrameworkInstallButton(installedPackageList, frameworkeSection);
-            uxml.Q("SolvePakcageDependencies").Q("Background").Q<Button>("Btn_Install").clicked += () => { };
-            
+            dimmed = uxml.Q("Dimmed");
+            SetBasicTemplateInstallButton(installedPackages, uxml.Q("BasicTemplate"));
+            SetFrameworkInstallButton(installedPackages, uxml.Q("Framework"));
+            SetDimmed(false);
             root.Add(uxml);
         }
 
-        private void SetBasicTemplateInstallButton(PackageCollection installedPackageList,
-            VisualElement basicTemplateSection)
+        private void SetDimmed(bool isDimmed)
         {
-            var installBtn = basicTemplateSection.Q("Background").Q<Button>("Btn_Install");
-            if (installedPackageList.Any(p => p.name == basicTemplatePackageName))
+            dimmed.visible = isDimmed;
+        }
+        
+        private void SetBasicTemplateInstallButton(
+            PackageCollection installed,
+            VisualElement section)
+        {
+            var btn = section.Q("Background").Q<Button>("Btn_Install");
+
+            if (installed.Any(p => p.name == basicTemplatePackageName))
             {
-                installBtn.text = "Remove Basic Template";
-                basicTemplateSection.RemoveFromClassList("installable");
-                basicTemplateSection.AddToClassList("removeable");
-                installBtn.clicked += () =>
+                btn.text = "Remove Basic Template";
+                SetSectionRemoveable(section);
+                btn.clicked += async () =>
                 {
-                    installButton = installBtn;
-                    RemovePackage(basicTemplatePackageName);
+                    SetDimmed(true);
+                    await RemovePackageAsync(basicTemplatePackageName);
+                    SetDimmed(false);
                 };
             }
             else
             {
-                installBtn.text = "Install Basic Template";
-                basicTemplateSection.RemoveFromClassList("removeable");
-                basicTemplateSection.AddToClassList("installable");
-                installBtn.clicked += () =>
+                btn.text = "Install Basic Template";
+                SetSectionInstallable(section);
+                btn.clicked += async () =>
                 {
-                    installButton = installBtn;
-                    InstallPackage(basicTemplatePackageUrl);
+                    SetDimmed(false);
+                    await InstallPackageAsync(basicTemplatePackageUrl);
+                    SetDimmed(true);
                 };
             }
         }
 
-        private void SetFrameworkInstallButton(PackageCollection installedPackageList,
-            VisualElement frameworkSection)
+        private void SetFrameworkInstallButton(
+            PackageCollection installed,
+            VisualElement section)
         {
-            var installBtn = frameworkSection.Q("Background").Q<Button>("Btn_Install");
-            if (installedPackageList.Any(p => p.name == frameworkPackageName))
+            var btn = section.Q("Background").Q<Button>("Btn_Install");
+
+            if (installed.Any(p => p.name == frameworkPackageName))
             {
-                installBtn.text = "Remove Framework";
-                frameworkSection.RemoveFromClassList("installable");
-                frameworkSection.AddToClassList("removeable");
-                installBtn.clicked += () =>
+                btn.text = "Remove Framework";
+                SetSectionRemoveable(section);
+                btn.clicked += async () =>
                 {
-                    installButton = installBtn;
-                    RemovePackage(frameworkPackageName);
+                    SetDimmed(true);
+                    await RemovePackageAsync(frameworkPackageName);
+                    SetDimmed(false);
                 };
             }
             else
             {
-                installBtn.text = "Install Framework";
-                frameworkSection.RemoveFromClassList("removeable");
-                frameworkSection.AddToClassList("installable");
-                installBtn.clicked += () =>
+                btn.text = "Install Framework";
+                SetSectionInstallable(section);
+                btn.clicked += async () =>
                 {
-                    installButton = installBtn;
-                    InstallPackage(frameworkPackageUrl);
+                    SetDimmed(true);
+                    await InstallPackageAsync(frameworkPackageUrl);
+                    SetDimmed(false);
                 };
             }
         }
 
-        private void RemovePackage(string packageName)
+        private void SetSectionInstallable(VisualElement section)
         {
-            installButton.SetEnabled(false);
-
-            removeRequest = Client.Remove(packageName);
-            EditorApplication.update += OnRemoveProgress;
+            section.RemoveFromClassList("removeable");
+            section.AddToClassList("installable");
         }
 
-        private void OnRemoveProgress()
+        private void SetSectionRemoveable(VisualElement section)
         {
-            if (!removeRequest.IsCompleted)
-                return;
-
-            EditorUtility.ClearProgressBar();
-            EditorApplication.update -= OnRemoveProgress;
-
-            if (removeRequest.Status == StatusCode.Success)
-            {
-                EditorUtility.DisplayDialog(
-                    "Remove Complete",
-                    "패키지가 제거되었습니다.",
-                    "OK");
-            }
-            else
-            {
-                EditorUtility.DisplayDialog(
-                    "Remove Failed",
-                    removeRequest.Error.message,
-                    "OK");
-            }
-
-            installButton.SetEnabled(true);
+            section.RemoveFromClassList("installable");
+            section.AddToClassList("removeable");
         }
 
-        private void InstallPackage(string packageName)
+        private Task InstallPackageAsync(string url)
         {
-            installButton.SetEnabled(false);
-            addRequest = Client.Add(packageName);
-            EditorApplication.update += OnInstallProgress;
+            var tcs = new TaskCompletionSource<bool>();
+            AddRequest request = Client.Add(url);
+
+            EditorApplication.update += Progress;
+
+            void Progress()
+            {
+                if (!request.IsCompleted) return;
+
+                EditorApplication.update -= Progress;
+
+                if (request.Status == StatusCode.Success)
+                    tcs.SetResult(true);
+                else
+                    tcs.SetException(new System.Exception(request.Error.message));
+            }
+
+            return tcs.Task;
         }
 
-        private void OnInstallProgress()
+        private Task RemovePackageAsync(string name)
         {
-            if (!addRequest.IsCompleted)
-                return;
-            EditorUtility.ClearProgressBar();
-            EditorApplication.update -= OnInstallProgress;
+            var tcs = new TaskCompletionSource<bool>();
+            RemoveRequest request = Client.Remove(name);
 
-            if (addRequest.Status != StatusCode.Success)
+            EditorApplication.update += Progress;
+
+            void Progress()
             {
-                EditorUtility.DisplayDialog(
-                    "Install Failed",
-                    addRequest.Error.message,
-                    "OK");
+                if (!request.IsCompleted) return;
+
+                EditorApplication.update -= Progress;
+
+                if (request.Status == StatusCode.Success)
+                    tcs.SetResult(true);
+                else
+                    tcs.SetException(new System.Exception(request.Error.message));
             }
-            else
-            {
-                EditorUtility.DisplayDialog(
-                    "Install Complete",
-                    $"패키지가 설치되었습니다.",
-                    "OK");
-            }
+
+            return tcs.Task;
         }
 
         private async Task<PackageCollection> GetInstalledPackages()
@@ -174,18 +180,14 @@ namespace Skddkkkk.DevelopKit.Editor
 
             void Progress()
             {
-                if (!request.IsCompleted)
-                    return;
+                if (!request.IsCompleted) return;
 
                 EditorApplication.update -= Progress;
+
                 if (request.Status == StatusCode.Success)
-                {
                     tcs.SetResult(request.Result);
-                }
                 else
-                {
                     tcs.SetException(new System.Exception(request.Error.message));
-                }
             }
 
             return await tcs.Task;
